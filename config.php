@@ -38,6 +38,25 @@ if (!function_exists('get_setting')) {
 function get_setting($key, $default = '') {
     static $settings = null;
     if ($settings === null) {
+        $settings = [
+            'site_name' => 'Harahetta Pinjaman Sejahtera',
+            'favicon' => 'favicon.ico'
+        ];
+        try {
+            $pdo = get_db_connection();
+            $stmt = $pdo->query("SHOW TABLES LIKE 'settings'");
+            if ($stmt->rowCount() > 0) {
+                $stmt = $pdo->query("SELECT key_name, value FROM settings");
+                while ($row = $stmt->fetch()) {
+                    $settings[$row['key_name']] = $row['value'];
+                }
+            }
+        } catch (Exception $e) {
+            // Fallback to defaults if DB error
+        }
+    }
+
+    if ($settings === null) {
         $pdo = get_db_connection();
         $stmt = $pdo->query("SELECT key_name, value FROM settings");
         $settings = [];

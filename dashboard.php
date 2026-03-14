@@ -4,8 +4,9 @@ if (!isset($_SESSION['admin_logged_in'])) {
     header('Location: login.php?url=dashboard');
     exit;
 }
+
 require_once 'config.php';
-require_once 'config.php'; // Force load function
+
 
 $pdo = get_db_connection();
 
@@ -27,14 +28,16 @@ $stats = $stmt->fetch();
     <title>Dashboard - <?php echo htmlspecialchars(get_setting('site_name', 'Harahetta Pinjaman Sejahtera')); ?></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.datatables.net/2.0.1/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+
+
     <link href="assets/css/style.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="icon" href="<?php echo htmlspecialchars(get_setting('favicon', 'favicon.ico')); ?>">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+
+
+
 </head>
 <body>
     <div id="wrapper">
@@ -69,14 +72,16 @@ $stats = $stmt->fetch();
                         <i class="bi bi-cash-coin"></i> Withdrawal Records
                     </a>
                 </div>
+
                 <button class="list-group-item list-group-item-action text-start" data-bs-toggle="collapse" data-bs-target="#loans" aria-expanded="false" aria-controls="loans">
                     <i class="bi bi-cash"></i> Loans
                 </button>
                 <div class="collapse" id="loans">
-                    <a href="#" class="list-group-item list-group-item-action ms-3">
+                    <a href="loans.php" class="list-group-item list-group-item-action ms-3">
                         <i class="bi bi-receipt"></i> Orderer
                     </a>
                 </div>
+
                 <a href="settings.php" class="list-group-item list-group-item-action">
                     <i class="bi bi-gear"></i> Settings
                 </a>
@@ -102,6 +107,7 @@ $stats = $stmt->fetch();
                 <h2>Dashboard <?php echo htmlspecialchars(get_setting('site_name', 'Pinjaman Sejahtera')); ?></h2>
 
                 <!-- Stats Cards -->
+
                 <div class="row mb-4">
                     <div class="col-xl-3 col-md-6">
                         <div class="card bg-primary text-white mb-4">
@@ -117,7 +123,7 @@ $stats = $stmt->fetch();
                                 </div>
                             </div>
                             <div class="card-footer d-flex align-items-center justify-content-between">
-                                <a class="small text-white stretched-link" href="#">View Details</a>
+                                <a class="small text-white stretched-link" href="loans.php">View Details</a>
                                 <div class="small text-white"><i class="bi bi-chevron-right"></i></div>
                             </div>
                         </div>
@@ -136,7 +142,7 @@ $stats = $stmt->fetch();
                                 </div>
                             </div>
                             <div class="card-footer d-flex align-items-center justify-content-between">
-                                <a class="small text-white stretched-link" href="#">View Details</a>
+                                <a class="small text-white stretched-link" href="loans.php">View Details</a>
                                 <div class="small text-white"><i class="bi bi-chevron-right"></i></div>
                             </div>
                         </div>
@@ -155,7 +161,7 @@ $stats = $stmt->fetch();
                                 </div>
                             </div>
                             <div class="card-footer d-flex align-items-center justify-content-between">
-                                <a class="small text-white stretched-link" href="#">View Details</a>
+                                <a class="small text-white stretched-link" href="loans.php">View Details</a>
                                 <div class="small text-white"><i class="bi bi-chevron-right"></i></div>
                             </div>
                         </div>
@@ -174,22 +180,35 @@ $stats = $stmt->fetch();
                                 </div>
                             </div>
                             <div class="card-footer d-flex align-items-center justify-content-between">
-                                <a class="small text-white stretched-link" href="#">View Details</a>
+                                <a class="small text-white stretched-link" href="loans.php">View Details</a>
                                 <div class="small text-white"><i class="bi bi-chevron-right"></i></div>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-        <!-- Table Pinjaman -->
-        <div class="card">
-            <div class="card-header d-flex justify-content-between">
+        </div>
+    </div>
+
+    <script>
+    $(document).ready(function() {
+        // Toggle sidebar only
+        $('#sidebarToggle').on('click', function() {
+            $('#sidebar-wrapper').toggleClass('show');
+        });
+    });
+    </script>
+</body>
+</html>
+
+            <!-- <div class="card-header d-flex justify-content-between">
                 <h5>Daftar Pinjaman</h5>
                 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
                     <i class="bi bi-plus"></i> Tambah Baru
                 </button>
-            </div>
-            <div class="card-body">
+            </div> -->
+            <!-- <div class="card-body">
                 <table id="pinjamanTable" class="table table-striped" style="width:100%">
                     <thead>
                         <tr>
@@ -208,12 +227,12 @@ $stats = $stmt->fetch();
                         </tr>
                     </thead>
                 </table>
-            </div>
+            </div> -->
         </div>
     </div>
 
     <!-- Add/Edit Modal -->
-    <div class="modal fade" id="addModal" tabindex="-1">
+    <!-- <div class="modal fade" id="addModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -283,7 +302,7 @@ $stats = $stmt->fetch();
                 </form>
             </div>
         </div>
-    </div>
+    </div> -->
 
 
     <script>
