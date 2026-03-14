@@ -27,6 +27,7 @@ switch ($action) {
         echo json_encode($stmt->fetchAll());
         break;
 
+
     case 'save':
         $id = $_POST['id'] ?? 0;
         $password = $_POST['password'] ?? '';
@@ -39,25 +40,41 @@ switch ($action) {
             'is_active' => (int)($_POST['is_active'] ?? 1)
         ];
 
-        if ($password) {
-            $data['password'] = password_hash($password, PASSWORD_DEFAULT);
-        }
-
         try {
             if ($id) {
-                $sql = 'UPDATE admins SET ' . implode(', ', array_map(fn($k) => "$k=?", array_keys($data))) . ' WHERE id=?';
+                $update_fields = [];
+                $params = [];
+                foreach ($data as $key => $value) {
+                    $update_fields[] = "$key=?";
+                    $params[] = $value;
+                }
+                $sql = 'UPDATE admins SET ' . implode(', ', $update_fields) . ' WHERE id=?';
+                $params[] = $id;
                 $stmt = $pdo->prepare($sql);
-                $stmt->execute(array_values($data) + [$id]);
+                $stmt->execute($params);
+                
+                if ($password) {
+                    $stmt = $pdo->prepare('UPDATE admins SET password = ? WHERE id = ?');
+                    $stmt->execute([password_hash($password, PASSWORD_DEFAULT), $id]);
+                }
             } else {
-                $sql = 'INSERT INTO admins (' . implode(', ', array_keys($data)) . ', password) VALUES (' . implode(',', array_fill(0, count($data), '?')) . ', ?)';
+
+                $fields = array_keys($data);
+                $fields[] = 'password';
+                $placeholders = implode(',', array_fill(0, count($fields), '?'));
+                $sql = 'INSERT INTO admins (' . implode(', ', $fields) . ') VALUES (' . $placeholders . ')';
+                $params = array_values($data);
+                $params[] = password_hash($password, PASSWORD_DEFAULT);
                 $stmt = $pdo->prepare($sql);
-                $stmt->execute(array_values($data) + [password_hash($_POST['password'], PASSWORD_DEFAULT)]);
+                $stmt->execute($params);
+
             }
             echo json_encode(['success' => true]);
         } catch (PDOException $e) {
             echo json_encode(['error' => 'DB Error: ' . $e->getMessage()]);
         }
         break;
+
 
     case 'delete':
         $id = $_POST['id'] ?? $_GET['id'] ?? 0;

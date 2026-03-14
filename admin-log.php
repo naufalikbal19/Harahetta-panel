@@ -1,70 +1,32 @@
+
 <?php
 session_start();
 if (!isset($_SESSION['admin_logged_in'])) {
-    header('Location: login.php?url=settings');
+    header('Location: login.php?url=admin-log');
     exit;
 }
 require_once 'config.php';
-
-$pdo = get_db_connection();
-
-// Handle form submission
-$message = '';
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $site_name = trim($_POST['site_name'] ?? '');
-    
-    // Update site_name
-    $stmt = $pdo->prepare("UPDATE settings SET value = ? WHERE key_name = 'site_name'");
-    $stmt->execute([$site_name]);
-    
-    // Handle favicon upload
-    if (isset($_FILES['favicon']) && $_FILES['favicon']['error'] == 0) {
-        $favicon_name = 'favicon_' . time() . '.' . pathinfo($_FILES['favicon']['name'], PATHINFO_EXTENSION);
-        $favicon_path = 'uploads/' . $favicon_name;
-        if (move_uploaded_file($_FILES['favicon']['tmp_name'], $favicon_path)) {
-            $stmt = $pdo->prepare("UPDATE settings SET value = ? WHERE key_name = 'favicon'");
-            $stmt->execute([$favicon_path]);
-        }
-    }
-    
-    // Handle logo upload
-    if (isset($_FILES['logo']) && $_FILES['logo']['error'] == 0) {
-        $logo_name = 'logo_' . time() . '.' . pathinfo($_FILES['logo']['name'], PATHINFO_EXTENSION);
-        $logo_path = 'uploads/' . $logo_name;
-        if (move_uploaded_file($_FILES['logo']['tmp_name'], $logo_path)) {
-            $stmt = $pdo->prepare("UPDATE settings SET value = ? WHERE key_name = 'logo'");
-            $stmt->execute([$logo_path]);
-        }
-    }
-    
-    $message = 'Settings updated successfully!';
-}
-
-// Fetch current settings
-$settings = [];
-$stmt = $pdo->query("SELECT key_name, value FROM settings");
-while ($row = $stmt->fetch()) {
-    $settings[$row['key_name']] = $row['value'];
-}
 ?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="utf-8">
-    <title>Settings - <?php echo htmlspecialchars($settings['site_name'] ?? 'Harahetta'); ?></title>
+    <title>Admin Log - <?php echo htmlspecialchars(get_setting('site_name', 'Harahetta Pinjaman Sejahtera')); ?></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css" rel="stylesheet">
     <link href="assets/css/style.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
 </head>
 <body>
     <div id="wrapper">
-        <!-- Sidebar -->
         <div id="sidebar-wrapper">
             <div class="sidebar-heading">
-                <i class="bi bi-bank"></i> <?php echo htmlspecialchars($settings['site_name'] ?? 'Harahetta'); ?> Admin
+                <i class="bi bi-bank"></i> <?php echo htmlspecialchars(get_setting('site_name', 'Harahetta')); ?> Admin
             </div>
             <div class="list-group list-group-flush">
 
@@ -82,7 +44,7 @@ while ($row = $stmt->fetch()) {
                         <i class="bi bi-person-gear"></i> Admin Management
                     </a>
 
-                    <a href="admin-log.php" class="list-group-item list-group-item-action ms-3">
+                    <a href="admin-log.php" class="list-group-item list-group-item-action ms-3 active">
                         <i class="bi bi-journal-text"></i> Admin Log
                     </a>
                 </div>
@@ -110,15 +72,13 @@ while ($row = $stmt->fetch()) {
                     </a>
                 </div>
 
-                <a href="settings.php" class="list-group-item list-group-item-action active">
+                <a href="settings.php" class="list-group-item list-group-item-action">
                     <i class="bi bi-gear"></i> Settings
                 </a>
             </div>
         </div>
 
-        <!-- Page Content -->
         <div id="page-content-wrapper">
-            <!-- Navbar -->
             <nav id="navbar-wrapper" class="navbar navbar-expand-lg navbar-light bg-light">
                 <button class="btn btn-outline-secondary d-md-none" id="sidebarToggle">
                     <i class="bi bi-list"></i>
@@ -132,38 +92,54 @@ while ($row = $stmt->fetch()) {
             </nav>
 
             <div class="container-fluid mt-4">
-                <h2>Website Settings</h2>
-
-                <?php if ($message): ?>
-                    <div class="alert alert-success"><?php echo $message; ?></div>
-                <?php endif; ?>
-
-                <form method="post" enctype="multipart/form-data">
-                    <div class="mb-3">
-                        <label for="site_name" class="form-label">Site Name</label>
-                        <input type="text" class="form-control" id="site_name" name="site_name" value="<?php echo htmlspecialchars($settings['site_name'] ?? ''); ?>" required>
+                <h2>Admin Activity Log</h2>
+                <div class="card">
+                    <div class="card-body">
+                        <table id="logTable" class="table table-striped" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Admin</th>
+                                    <th>Action</th>
+                                    <th>Deskripsi</th>
+                                    <th>IP Address</th>
+                                    <th>User Agent</th>
+                                    <th>Waktu</th>
+                                </tr>
+                            </thead>
+                        </table>
                     </div>
-                    <div class="mb-3">
-                        <label for="favicon" class="form-label">Favicon (Upload new favicon)</label>
-                        <input type="file" class="form-control" id="favicon" name="favicon" accept="image/*">
-                        <small class="form-text text-muted">Current: <?php echo htmlspecialchars($settings['favicon'] ?? 'None'); ?></small>
-                    </div>
-                    <div class="mb-3">
-                        <label for="logo" class="form-label">Logo (Upload new logo)</label>
-                        <input type="file" class="form-control" id="logo" name="logo" accept="image/*">
-                        <small class="form-text text-muted">Current: <?php echo htmlspecialchars($settings['logo'] ?? 'None'); ?></small>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Save Settings</button>
-                </form>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Toggle sidebar
+    $(document).ready(function() {
+        var table = $('#logTable').DataTable({
+            ajax: {
+                url: 'api/admin-log.php?action=list',
+                dataSrc: ''
+            },
+            columns: [
+                { data: 'id' },
+                { data: 'username' },
+                { data: 'action' },
+                { data: 'description' },
+                { data: 'ip_address' },
+                { data: 'user_agent', render: function(data) {
+                    return data ? data.substring(0, 50) + '...' : '-';
+                }},
+                { data: 'created_at' }
+            ],
+            order: [[6, 'desc']]
+        });
+
         $('#sidebarToggle').on('click', function() {
             $('#sidebar-wrapper').toggleClass('show');
         });
+    });
     </script>
 </body>
 </html>
+

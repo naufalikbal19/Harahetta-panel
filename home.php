@@ -43,9 +43,9 @@ $stats = $stmt->fetch();
                 <i class="bi bi-bank"></i> <?php echo htmlspecialchars(get_setting('site_name', 'Harahetta')); ?> Admin
             </div>
             <div class="list-group list-group-flush">
-                <a href="home.php" class="list-group-item list-group-item-action active">
-                    <i class="bi bi-house"></i> Home
-                </a>
+
+                
+
                 <a href="dashboard.php" class="list-group-item list-group-item-action">
                     <i class="bi bi-terminal"></i> Console
                 </a>
@@ -60,14 +60,20 @@ $stats = $stmt->fetch();
                         <i class="bi bi-journal-text"></i> Admin Log
                     </a>
                 </div>
+
                 <button class="list-group-item list-group-item-action text-start" data-bs-toggle="collapse" data-bs-target="#memberManagement" aria-expanded="false" aria-controls="memberManagement">
                     <i class="bi bi-people"></i> Member Management
                 </button>
                 <div class="collapse" id="memberManagement">
-                    <a href="#" class="list-group-item list-group-item-action ms-3">
-                        <i class="bi bi-cash-coin"></i> Withdrawal Records
+                    <a href="members.php" class="list-group-item list-group-item-action ms-3">
+                        <i class="bi bi-list-ul"></i> Member List
                     </a>
                 </div>
+
+                <a href="#" class="list-group-item list-group-item-action">
+                    <i class="bi bi-cash-coin"></i> Withdrawal Records
+                </a>
+
                 <button class="list-group-item list-group-item-action text-start" data-bs-toggle="collapse" data-bs-target="#loans" aria-expanded="false" aria-controls="loans">
                     <i class="bi bi-cash"></i> Loans
                 </button>

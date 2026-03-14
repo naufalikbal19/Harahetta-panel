@@ -1,81 +1,134 @@
--- Rekreasi DB untuk Harahetta Admin Panel Pinjaman Sejahtera
--- Jalankan: mysql -u root -p < db.sql (ubah user/pass jika perlu)
--- DB: harahetta_db, Table: pinjaman
 
-CREATE DATABASE IF NOT EXISTS harahetta_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE harahetta_db;
+<?php
+session_start();
+if (!isset($_SESSION['admin_logged_in'])) {
+    header('Location: login.php');
+    exit;
+}
+require_once 'config.php';
+?>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <title>Member List - <?php echo htmlspecialchars(get_setting('site_name')); ?></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <link href="assets/css/style.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+</head>
+<body>
+    <div id="wrapper">
+        <div id="sidebar-wrapper">
+            <div class="sidebar-heading">
+                <i class="bi bi-bank"></i> <?php echo htmlspecialchars(get_setting('site_name')); ?> Admin
+            </div>
+            <div class="list-group list-group-flush">
+                <a href="dashboard.php" class="list-group-item list-group-item-action">
+                    <i class="bi bi-house"></i> Home
+                </a>
+                <a href="dashboard.php" class="list-group-item list-group-item-action">
+                    <i class="bi bi-terminal"></i> Console
+                </a>
+                <button class="list-group-item list-group-item-action text-start" data-bs-toggle="collapse" data-bs-target="#adminManagement">
+                    <i class="bi bi-shield"></i> Admin Management
+                </button>
+                <div class="collapse">
+                    <a href="admin.php" class="list-group-item list-group-item-action ms-3">
+                        <i class="bi bi-person-gear"></i> Admin Management
+                    </a>
+                </div>
+                <button class="list-group-item list-group-item-action text-start active" data-bs-toggle="collapse" data-bs-target="#memberManagement">
+                    <i class="bi bi-people"></i> Member Management
+                </button>
+                <div class="collapse show">
+                    <a href="members.php" class="list-group-item list-group-item-action ms-3 active">
+                        <i class="bi bi-list-ul"></i> Member List
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action ms-3">
+                        <i class="bi bi-cash-coin"></i> Withdrawal Records
+                    </a>
+                </div>
+                <a href="settings.php" class="list-group-item list-group-item-action">
+                    <i class="bi bi-gear"></i> Settings
+                </a>
+            </div>
+        </div>
 
-DROP TABLE IF EXISTS `pinjaman`;
-CREATE TABLE `pinjaman` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `order_number` varchar(50) DEFAULT NULL COMMENT 'Order Number',
-  `username` varchar(50) DEFAULT NULL COMMENT 'Username',
-  `phone_number` varchar(20) DEFAULT NULL COMMENT 'Phone Number',
-  `uid` varchar(50) DEFAULT NULL COMMENT 'UID',
-  `nama_peminjam` varchar(100) DEFAULT NULL COMMENT 'Nama Peminjam',
-  `jumlah_pinjaman` decimal(15,2) NOT NULL DEFAULT 0.00 COMMENT 'Loan Amount',
-  `loan_period` int(11) DEFAULT NULL COMMENT 'Loan Period (days)',
+        <div id="page-content-wrapper">
+            <nav class="navbar navbar-light bg-light">
+                <button class="btn btn-outline-secondary d-md-none" id="sidebarToggle">
+                    <i class="bi bi-list"></i>
+                </button>
+                <div class="ms-auto">
+                    <span class="navbar-text me-3">Halo, <?php echo htmlspecialchars($_SESSION['username']); ?>!</span>
+                    <a class="btn btn-outline-danger btn-sm" href="logout.php">
+                        <i class="bi bi-box-arrow-right"></i> Keluar
+                    </a>
+                </div>
+            </nav>
 
-  `sign` varchar(255) DEFAULT NULL COMMENT 'Signature path',
-  `id_front` varchar(255) DEFAULT NULL COMMENT 'Foto Depan ID Card',
-  `id_back` varchar(255) DEFAULT NULL COMMENT 'Foto Belakang ID Card',
-  `selfie` varchar(255) DEFAULT NULL COMMENT 'Photo Selfie',
-  `bank` varchar(50) DEFAULT NULL COMMENT 'Bank',
-  `no_rekening` varchar(50) DEFAULT NULL COMMENT 'Nomor Rekening',
-  `tanggal_pinjam` date NOT NULL COMMENT 'Application Time',
+            <div class="container-fluid mt-4">
+                <h2>Daftar Member</h2>
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between">
+                        <h5>Semua Member</h5>
+                    </div>
+                    <div class="card-body">
+                        <table id="memberTable" class="table table-striped" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nomor HP</th>
+                                    <th>Nama</th>
+                                    <th>Bank</th>
+                                    <th>Nomor Rekening</th>
+                                    <th>Foto KTP Depan</th>
+                                    <th>Foto KTP Belakang</th>
+                                    <th>Foto Selfie</th>
+                                    <th>Terdaftar</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-  `status` enum('pending','proses','lunas','macet') NOT NULL DEFAULT 'pending' COMMENT 'Status',
-  `keterangan` text DEFAULT NULL COMMENT 'Keterangan',
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `order_number` (`order_number`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Tabel Pinjaman';
+    <script>
+    $(document).ready(function() {
+        var table = $('#memberTable').DataTable({
+            ajax: 'api/members.php?action=list',
+            columns: [
+                { data: 'id' },
+                { data: 'phone' },
+                { data: 'nama' },
+                { data: 'bank' },
+                { data: 'nomor_rekening' },
+                { data: 'foto_ktp_depan', render: function(data) {
+                    return data ? '<img src="' + data + '" style="width:50px;height:50px;object-fit:cover;" class="rounded">' : '-';
+                }},
+                { data: 'foto_ktp_belakang', render: function(data) {
+                    return data ? '<img src="' + data + '" style="width:50px;height:50px;object-fit:cover;" class="rounded">' : '-';
+                }},
+                { data: 'foto_selfie', render: function(data) {
+                    return data ? '<img src="' + data + '" style="width:50px;height:50px;object-fit:cover;" class="rounded">' : '-';
+                }},
+                { data: 'created_at' }
+            ]
+        });
 
--- Sample data (more dummy)
-INSERT INTO `pinjaman` (`order_number`, `username`, `phone_number`, `uid`, `nama_peminjam`, `jumlah_pinjaman`, `loan_period`, `sign`, `tanggal_pinjam`, `status`, `keterangan`) VALUES
-('ORD2024001', 'user001', 'user001', 'U2024001ABC', 'John Doe', 5000000.00, 30, 'signs/001.jpg', '2024-01-15', 'pending', 'Pinjaman modal usaha'),
-('ORD2024002', 'user002', 'user002', 'U2024002DEF', 'Jane Smith', 10000000.00, 60, 'signs/002.jpg', '2024-02-01', 'proses', 'Pinjaman rumah'),
-('ORD2024003', 'user003', 'user003', 'U2024003GHI', 'Bob Johnson', 7500000.00, 45, 'signs/003.jpg', '2023-12-10', 'lunas', 'Pinjaman lunas tepat waktu'),
-('ORD2024004', 'user004', 'user004', 'U2024004JKL', 'Alice Brown', 3000000.00, 30, 'signs/004.jpg', '2024-03-01', 'macet', 'Belum bayar cicilan'),
-('ORD2024005', 'user005', 'user005', 'U2024005MNO', 'Test User 5', 2000000.00, 15, 'signs/005.jpg', '2024-04-01', 'pending', 'Test dummy'),
-('ORD2024006', 'user006', 'user006', 'U2024006PQR', 'Demo User 6', 15000000.00, 90, 'signs/006.jpg', '2024-04-05', 'proses', 'Demo pinjaman besar'),
-('ORD2024007', 'user007', 'user007', 'U2024007STU', 'User Seven', 8000000.00, 60, 'signs/007.jpg', '2024-03-20', 'lunas', 'Lunas dummy'),
-('ORD2024008', 'user008', 'user008', 'U2024008VWX', 'Borrower 8', 4000000.00, 30, 'signs/008.jpg', '2024-04-10', 'macet', 'Macet test');
-
-DROP TABLE IF EXISTS `settings`;
-CREATE TABLE `settings` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `key_name` varchar(50) NOT NULL,
-  `value` text,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `key_name` (`key_name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Tabel Settings';
-
-
--- Default settings
-INSERT INTO `settings` (`key_name`, `value`) VALUES
-('site_name', 'Harahetta Pinjaman Sejahtera'),
-('favicon', 'favicon.ico'),
-('logo', 'logo.png');
-
-DROP TABLE IF EXISTS `admins`;
-CREATE TABLE `admins` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `username` varchar(50) NOT NULL UNIQUE,
-  `email` varchar(100) DEFAULT NULL,
-  `password` varchar(255) NOT NULL,
-  `full_name` varchar(100) DEFAULT NULL,
-  `role` enum('superadmin','admin') DEFAULT 'admin',
-  `is_active` tinyint(1) DEFAULT 1,
-  `last_login` timestamp NULL,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Admin Users';
-
--- Default superadmin
-INSERT INTO `admins` (`username`, `password`, `full_name`, `role`) VALUES
-('admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Super Admin', 'superadmin');
--- password: password
+        $('#sidebarToggle').on('click', function() {
+            $('#sidebar-wrapper').toggleClass('show');
+        });
+    });
+    </script>
+</body>
+</html>
 

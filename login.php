@@ -26,10 +26,17 @@ if ($_POST) {
     if ($captcha != $_SESSION['captcha']) {
         $error = 'Captcha salah!';
 
+
     } else {
-        $stmt = $pdo->prepare("SELECT id, username, full_name, password FROM admins WHERE username = ? AND is_active = 1");
-        $stmt->execute([$username]);
-        $admin = $stmt->fetch();
+        try {
+            $pdo = get_db_connection();
+            $stmt = $pdo->prepare("SELECT id, username, full_name, password FROM admins WHERE username = ? AND is_active = 1");
+            $stmt->execute([$username]);
+            $admin = $stmt->fetch();
+        } catch (Exception $e) {
+            $error = 'Database error. Jalankan setup.php terlebih dahulu.';
+        }
+
         if ($admin && password_verify($password, $admin['password'])) {
             $_SESSION['admin_id'] = $admin['id'];
             $_SESSION['admin_logged_in'] = true;

@@ -29,31 +29,40 @@ require_once 'config.php';
                 <i class="bi bi-bank"></i> <?php echo htmlspecialchars(get_setting('site_name', 'Harahetta')); ?> Admin
             </div>
             <div class="list-group list-group-flush">
-                <a href="home.php" class="list-group-item list-group-item-action">
-                    <i class="bi bi-house"></i> Home
-                </a>
+
+                
+
                 <a href="dashboard.php" class="list-group-item list-group-item-action">
                     <i class="bi bi-terminal"></i> Console
                 </a>
-                <button class="list-group-item list-group-item-action text-start active" data-bs-toggle="collapse" data-bs-target="#adminManagement" aria-expanded="true" aria-controls="adminManagement">
+                <button class="list-group-item list-group-item-action text-start" data-bs-toggle="collapse" data-bs-target="#adminManagement" aria-expanded="false" aria-controls="adminManagement">
                     <i class="bi bi-shield"></i> Admin Management
                 </button>
-                <div class="collapse show" id="adminManagement">
+                <div class="collapse" id="adminManagement">
+
                     <a href="admin.php" class="list-group-item list-group-item-action ms-3 active">
                         <i class="bi bi-person-gear"></i> Admin Management
                     </a>
-                    <a href="#" class="list-group-item list-group-item-action ms-3">
+
+                    <a href="admin-log.php" class="list-group-item list-group-item-action ms-3">
                         <i class="bi bi-journal-text"></i> Admin Log
                     </a>
                 </div>
+
                 <button class="list-group-item list-group-item-action text-start" data-bs-toggle="collapse" data-bs-target="#memberManagement" aria-expanded="false" aria-controls="memberManagement">
                     <i class="bi bi-people"></i> Member Management
                 </button>
                 <div class="collapse" id="memberManagement">
-                    <a href="#" class="list-group-item list-group-item-action ms-3">
-                        <i class="bi bi-cash-coin"></i> Withdrawal Records
+                    <a href="members.php" class="list-group-item list-group-item-action ms-3">
+                        <i class="bi bi-list-ul"></i> Member List
                     </a>
                 </div>
+
+                <a href="#" class="list-group-item list-group-item-action">
+                    <i class="bi bi-cash-coin"></i> Withdrawal Records
+                </a>
+
+
                 <button class="list-group-item list-group-item-action text-start" data-bs-toggle="collapse" data-bs-target="#loans" aria-expanded="false" aria-controls="loans">
                     <i class="bi bi-cash"></i> Loans
                 </button>
@@ -62,6 +71,7 @@ require_once 'config.php';
                         <i class="bi bi-receipt"></i> Orderer
                     </a>
                 </div>
+
                 <a href="settings.php" class="list-group-item list-group-item-action">
                     <i class="bi bi-gear"></i> Settings
                 </a>
@@ -167,10 +177,15 @@ require_once 'config.php';
     $(document).ready(function() {
         var table = $('#adminTable').DataTable({
 
-            ajax: {
-                url: 'api/admin.php?action=list',
-                dataSrc: ''
-            },
+
+                ajax: {
+                    url: 'api/admin.php?action=list',
+                    dataSrc: function(json) {
+                        console.log('List response:', json);
+                        return json;
+                    }
+                },
+
 
             columns: [
                 { data: 'id' },
@@ -199,14 +214,22 @@ require_once 'config.php';
                 data: new FormData(this),
                 processData: false,
                 contentType: false,
+
+
+
                 success: function(response) {
-                    if (response.success) {
+                    console.log('Save API Response:', response);
+                    if (response && response.success === true) {
                         table.ajax.reload();
                         $('#addModal').modal('hide');
+                        alert('Admin berhasil disimpan!');
                     } else {
-                        alert('Error: ' + response.error);
+                        alert('Error atau response tidak valid. Console: ' + JSON.stringify(response));
                     }
                 }
+
+
+
             });
         });
 

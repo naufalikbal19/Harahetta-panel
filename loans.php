@@ -33,9 +33,9 @@ $pdo = get_db_connection();
                 <i class="bi bi-bank"></i> <?php echo htmlspecialchars(get_setting('site_name', 'Harahetta')); ?> Admin
             </div>
             <div class="list-group list-group-flush">
-                <a href="home.php" class="list-group-item list-group-item-action">
-                    <i class="bi bi-house"></i> Home
-                </a>
+
+                
+
                 <a href="dashboard.php" class="list-group-item list-group-item-action">
                     <i class="bi bi-terminal"></i> Console
                 </a>
@@ -48,26 +48,34 @@ $pdo = get_db_connection();
                         <i class="bi bi-person-gear"></i> Admin Management
                     </a>
 
-                    <a href="#" class="list-group-item list-group-item-action ms-3">
+                    <a href="admin-log.php" class="list-group-item list-group-item-action ms-3">
                         <i class="bi bi-journal-text"></i> Admin Log
                     </a>
                 </div>
+
                 <button class="list-group-item list-group-item-action text-start" data-bs-toggle="collapse" data-bs-target="#memberManagement" aria-expanded="false" aria-controls="memberManagement">
                     <i class="bi bi-people"></i> Member Management
                 </button>
                 <div class="collapse" id="memberManagement">
-                    <a href="#" class="list-group-item list-group-item-action ms-3">
-                        <i class="bi bi-cash-coin"></i> Withdrawal Records
+                    <a href="members.php" class="list-group-item list-group-item-action ms-3">
+                        <i class="bi bi-list-ul"></i> Member List
                     </a>
                 </div>
-                <button class="list-group-item list-group-item-action text-start" data-bs-toggle="collapse" data-bs-target="#loans" aria-expanded="true" aria-controls="loans">
+
+                <a href="#" class="list-group-item list-group-item-action">
+                    <i class="bi bi-cash-coin"></i> Withdrawal Records
+                </a>
+
+
+                <button class="list-group-item list-group-item-action text-start" data-bs-toggle="collapse" data-bs-target="#loans" aria-expanded="false" aria-controls="loans">
                     <i class="bi bi-cash"></i> Loans
                 </button>
-                <div class="collapse show" id="loans">
+                <div class="collapse" id="loans">
                     <a href="loans.php" class="list-group-item list-group-item-action ms-3 active">
                         <i class="bi bi-receipt"></i> Orderer
                     </a>
                 </div>
+
                 <a href="settings.php" class="list-group-item list-group-item-action">
                     <i class="bi bi-gear"></i> Settings
                 </a>
