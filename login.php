@@ -21,22 +21,32 @@ if ($_POST) {
     $password = $_POST['password'] ?? '';
     $captcha = $_POST['captcha'] ?? '';
     
+
     // Check captcha
     if ($captcha != $_SESSION['captcha']) {
         $error = 'Captcha salah!';
-    } elseif ($username === 'admin' && $password === 'qaz899wsx') {
-        $_SESSION['admin_logged_in'] = true;
-        $_SESSION['username'] = $username;
-        if (isset($_POST['keeplogin'])) {
-            // Keep login for 24 hours
-            $_SESSION['expires'] = time() + 86400;
-        }
-        unset($_SESSION['captcha']); // Clear captcha
-        header('Location: dashboard.php');
-        exit;
+
     } else {
-        $error = 'Username atau password salah!';
+        $stmt = $pdo->prepare("SELECT id, username, full_name, password FROM admins WHERE username = ? AND is_active = 1");
+        $stmt->execute([$username]);
+        $admin = $stmt->fetch();
+        if ($admin && password_verify($password, $admin['password'])) {
+            $_SESSION['admin_id'] = $admin['id'];
+            $_SESSION['admin_logged_in'] = true;
+            $_SESSION['username'] = $admin['username'];
+            $_SESSION['full_name'] = $admin['full_name'];
+            if (isset($_POST['keeplogin'])) {
+                $_SESSION['expires'] = time() + 86400;
+            }
+            unset($_SESSION['captcha']);
+            header('Location: dashboard.php');
+            exit;
+        } else {
+            $error = 'Username atau password salah!';
+        }
     }
+
+
     // Regenerate captcha on error
     $_SESSION['captcha'] = rand(1000, 9999);
 }

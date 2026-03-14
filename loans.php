@@ -43,9 +43,11 @@ $pdo = get_db_connection();
                     <i class="bi bi-shield"></i> Admin Management
                 </button>
                 <div class="collapse" id="adminManagement">
-                    <a href="#" class="list-group-item list-group-item-action ms-3">
+
+                    <a href="admin.php" class="list-group-item list-group-item-action ms-3">
                         <i class="bi bi-person-gear"></i> Admin Management
                     </a>
+
                     <a href="#" class="list-group-item list-group-item-action ms-3">
                         <i class="bi bi-journal-text"></i> Admin Log
                     </a>
@@ -160,14 +162,48 @@ $pdo = get_db_connection();
                                     <label class="form-label">Loan Period (days)</label>
                                     <input type="number" class="form-control" name="loan_period">
                                 </div>
+
+
                                 <div class="mb-3">
-                                    <label class="form-label">Sign (path)</label>
-                                    <input type="text" class="form-control" name="sign">
+                                    <label class="form-label">Sign</label>
+                                    <input type="file" class="form-control" name="sign_file" accept="image/*">
+                                    <small class="text-muted">Upload gambar tanda tangan (JPG/PNG)</small>
+                                    <div id="sign-preview" class="mt-2"></div>
                                 </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Foto Depan Id Card</label>
+                                    <input type="file" class="form-control" name="id_front_file" accept="image/*">
+                                    <div id="id-front-preview" class="mt-2"></div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Foto Belakang Id Card</label>
+                                    <input type="file" class="form-control" name="id_back_file" accept="image/*">
+                                    <div id="id-back-preview" class="mt-2"></div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Photo Selfie</label>
+                                    <input type="file" class="form-control" name="selfie_file" accept="image/*">
+                                    <div id="selfie-preview" class="mt-2"></div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Bank</label>
+                                    <input type="text" class="form-control" name="bank">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Nomor Rekening</label>
+                                    <input type="text" class="form-control" name="no_rekening">
+                                </div>
+
                                 <div class="mb-3">
                                     <label class="form-label">Application Time</label>
                                     <input type="date" class="form-control" name="tanggal_pinjam" required>
                                 </div>
+
                                 <div class="mb-3">
                                     <label class="form-label">Status</label>
                                     <select class="form-select" name="status" required>
@@ -242,19 +278,52 @@ $pdo = get_db_connection();
 
         // Load data (auto with ajax)
 
-        // Add/Edit
+
+
+        // File preview handlers
+        function previewFile(input, previewId) {
+            var file = input.files[0];
+            if (file) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#' + previewId).html('<img src="' + e.target.result + '" style="max-width:200px;max-height:100px;border:1px solid #ddd;border-radius:4px;">');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        $('input[name="sign_file"]').on('change', function() {
+            previewFile(this, 'sign-preview');
+        });
+        $('input[name="id_front_file"]').on('change', function() {
+            previewFile(this, 'id-front-preview');
+        });
+        $('input[name="id_back_file"]').on('change', function() {
+            previewFile(this, 'id-back-preview');
+        });
+        $('input[name="selfie_file"]').on('change', function() {
+            previewFile(this, 'selfie-preview');
+        });
+
+
+        // Add/Edit - use FormData for file upload
         $('#pinjamanForm').on('submit', function(e) {
             e.preventDefault();
+            var formData = new FormData(this);
+            formData.append('action', 'save');
             $.ajax({
                 url: 'api/loans.php',
                 type: 'POST',
-                data: $(this).serialize() + '&action=save',
+                data: formData,
+                processData: false,
+                contentType: false,
                 success: function(response) {
                     if (response.success) {
                         table.ajax.reload();
                         var modalEl = document.getElementById('addModal');
                         var modal = bootstrap.Modal.getInstance(modalEl);
                         modal.hide();
+                        $('#sign-preview').empty();
                     } else {
                         alert('Error: ' + (response.error || 'Unknown'));
                     }
@@ -264,6 +333,7 @@ $pdo = get_db_connection();
                 }
             });
         });
+
 
         // Reset form
         $('[data-bs-target="#addModal"]').on('click', function() {
@@ -278,16 +348,23 @@ $pdo = get_db_connection();
             $.get('api/loans.php?id=' + id, function(data) {
                 if (data.id) {
                     $('#id').val(data.id);
+
                     $('#pinjamanForm input[name="username"]').val(data.username);
                     $('#pinjamanForm input[name="phone_number"]').val(data.phone_number);
                     $('#pinjamanForm input[name="uid"]').val(data.uid);
                     $('#pinjamanForm input[name="nama_peminjam"]').val(data.nama_peminjam);
                     $('#pinjamanForm input[name="jumlah_pinjaman"]').val(data.jumlah_pinjaman);
                     $('#pinjamanForm input[name="loan_period"]').val(data.loan_period);
-                    $('#pinjamanForm input[name="sign"]').val(data.sign);
+                    $('#pinjamanForm input[name="sign"]').val(data.sign || '');
+                    $('#pinjamanForm input[name="id_front"]').val(data.id_front || '');
+                    $('#pinjamanForm input[name="id_back"]').val(data.id_back || '');
+                    $('#pinjamanForm input[name="selfie"]').val(data.selfie || '');
+                    $('#pinjamanForm input[name="bank"]').val(data.bank || '');
+                    $('#pinjamanForm input[name="no_rekening"]').val(data.no_rekening || '');
                     $('#pinjamanForm select[name="status"]').val(data.status);
                     $('#pinjamanForm input[name="tanggal_pinjam"]').val(data.tanggal_pinjam);
                     $('#pinjamanForm textarea[name="keterangan"]').val(data.keterangan);
+
                     $('.modal-title').text('Edit Pinjaman');
                     new bootstrap.Modal(document.getElementById('addModal')).show();
                 } else {

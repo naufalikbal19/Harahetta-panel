@@ -15,8 +15,15 @@ CREATE TABLE `pinjaman` (
   `nama_peminjam` varchar(100) DEFAULT NULL COMMENT 'Nama Peminjam',
   `jumlah_pinjaman` decimal(15,2) NOT NULL DEFAULT 0.00 COMMENT 'Loan Amount',
   `loan_period` int(11) DEFAULT NULL COMMENT 'Loan Period (days)',
+
   `sign` varchar(255) DEFAULT NULL COMMENT 'Signature path',
+  `id_front` varchar(255) DEFAULT NULL COMMENT 'Foto Depan ID Card',
+  `id_back` varchar(255) DEFAULT NULL COMMENT 'Foto Belakang ID Card',
+  `selfie` varchar(255) DEFAULT NULL COMMENT 'Photo Selfie',
+  `bank` varchar(50) DEFAULT NULL COMMENT 'Bank',
+  `no_rekening` varchar(50) DEFAULT NULL COMMENT 'Nomor Rekening',
   `tanggal_pinjam` date NOT NULL COMMENT 'Application Time',
+
   `status` enum('pending','proses','lunas','macet') NOT NULL DEFAULT 'pending' COMMENT 'Status',
   `keterangan` text DEFAULT NULL COMMENT 'Keterangan',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -45,8 +52,30 @@ CREATE TABLE `settings` (
   UNIQUE KEY `key_name` (`key_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Tabel Settings';
 
+
 -- Default settings
 INSERT INTO `settings` (`key_name`, `value`) VALUES
 ('site_name', 'Harahetta Pinjaman Sejahtera'),
 ('favicon', 'favicon.ico'),
 ('logo', 'logo.png');
+
+DROP TABLE IF EXISTS `admins`;
+CREATE TABLE `admins` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(50) NOT NULL UNIQUE,
+  `email` varchar(100) DEFAULT NULL,
+  `password` varchar(255) NOT NULL,
+  `full_name` varchar(100) DEFAULT NULL,
+  `role` enum('superadmin','admin') DEFAULT 'admin',
+  `is_active` tinyint(1) DEFAULT 1,
+  `last_login` timestamp NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Admin Users';
+
+-- Default superadmin
+INSERT INTO `admins` (`username`, `password`, `full_name`, `role`) VALUES
+('admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Super Admin', 'superadmin');
+-- password: password
+

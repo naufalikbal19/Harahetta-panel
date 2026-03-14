@@ -57,9 +57,11 @@ $stats = $stmt->fetch();
                     <i class="bi bi-shield"></i> Admin Management
                 </button>
                 <div class="collapse" id="adminManagement">
-                    <a href="#" class="list-group-item list-group-item-action ms-3">
+
+                    <a href="admin.php" class="list-group-item list-group-item-action ms-3">
                         <i class="bi bi-person-gear"></i> Admin Management
                     </a>
+
                     <a href="#" class="list-group-item list-group-item-action ms-3">
                         <i class="bi bi-journal-text"></i> Admin Log
                     </a>

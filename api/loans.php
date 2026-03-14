@@ -43,19 +43,88 @@ switch ($action) {
 
     case 'save':
         $id = $_POST['id'] ?? 0;
+
+
+
         $data = [
             'order_number' => $_POST['order_number'] ?? 'ORD' . date('Ymd') . rand(100,999),
             'username' => trim($_POST['username'] ?? ''),
-            'phone_number' => trim($_POST['username'] ?? ''),
+            'phone_number' => trim($_POST['phone_number'] ?? ''),
             'uid' => $_POST['uid'] ?? 'U' . date('Y') . rand(1000,9999) . chr(65+rand(0,25)) . chr(65+rand(0,25)),
             'nama_peminjam' => trim($_POST['nama_peminjam'] ?? ''),
             'jumlah_pinjaman' => floatval($_POST['jumlah_pinjaman'] ?? 0),
             'loan_period' => intval($_POST['loan_period'] ?? 0),
             'sign' => trim($_POST['sign'] ?? ''),
+            'id_front' => trim($_POST['id_front'] ?? ''),
+            'id_back' => trim($_POST['id_back'] ?? ''),
+            'selfie' => trim($_POST['selfie'] ?? ''),
+            'bank' => trim($_POST['bank'] ?? ''),
+            'no_rekening' => trim($_POST['no_rekening'] ?? ''),
             'status' => $_POST['status'] ?? 'pending',
             'tanggal_pinjam' => $_POST['tanggal_pinjam'] ?? date('Y-m-d'),
             'keterangan' => trim($_POST['keterangan'] ?? '')
         ];
+
+
+
+
+
+        $data['sign'] = trim($_POST['sign'] ?? '');
+
+        $upload_dir = '../uploads/';
+        if (!is_dir($upload_dir)) {
+            mkdir($upload_dir, 0755, true);
+        }
+        $allowed = ['jpg', 'jpeg', 'png'];
+
+        // Sign upload
+        if (isset($_FILES['sign_file']) && $_FILES['sign_file']['error'] === UPLOAD_ERR_OK) {
+            $file_ext = strtolower(pathinfo($_FILES['sign_file']['name'], PATHINFO_EXTENSION));
+            if (in_array($file_ext, $allowed)) {
+                $unique_name = uniqid() . '_sign_' . time() . '.' . $file_ext;
+                $upload_path = $upload_dir . $unique_name;
+                if (move_uploaded_file($_FILES['sign_file']['tmp_name'], $upload_path)) {
+                    $data['sign'] = 'uploads/' . $unique_name;
+                }
+            }
+        }
+
+        // ID Front upload
+        if (isset($_FILES['id_front_file']) && $_FILES['id_front_file']['error'] === UPLOAD_ERR_OK) {
+            $file_ext = strtolower(pathinfo($_FILES['id_front_file']['name'], PATHINFO_EXTENSION));
+            if (in_array($file_ext, $allowed)) {
+                $unique_name = uniqid() . '_idfront_' . time() . '.' . $file_ext;
+                $upload_path = $upload_dir . $unique_name;
+                if (move_uploaded_file($_FILES['id_front_file']['tmp_name'], $upload_path)) {
+                    $data['id_front'] = 'uploads/' . $unique_name;
+                }
+            }
+        }
+
+        // ID Back upload
+        if (isset($_FILES['id_back_file']) && $_FILES['id_back_file']['error'] === UPLOAD_ERR_OK) {
+            $file_ext = strtolower(pathinfo($_FILES['id_back_file']['name'], PATHINFO_EXTENSION));
+            if (in_array($file_ext, $allowed)) {
+                $unique_name = uniqid() . '_idback_' . time() . '.' . $file_ext;
+                $upload_path = $upload_dir . $unique_name;
+                if (move_uploaded_file($_FILES['id_back_file']['tmp_name'], $upload_path)) {
+                    $data['id_back'] = 'uploads/' . $unique_name;
+                }
+            }
+        }
+
+        // Selfie upload
+        if (isset($_FILES['selfie_file']) && $_FILES['selfie_file']['error'] === UPLOAD_ERR_OK) {
+            $file_ext = strtolower(pathinfo($_FILES['selfie_file']['name'], PATHINFO_EXTENSION));
+            if (in_array($file_ext, $allowed)) {
+                $unique_name = uniqid() . '_selfie_' . time() . '.' . $file_ext;
+                $upload_path = $upload_dir . $unique_name;
+                if (move_uploaded_file($_FILES['selfie_file']['tmp_name'], $upload_path)) {
+                    $data['selfie'] = 'uploads/' . $unique_name;
+                }
+            }
+        }
+
 
         try {
             if ($id) {
@@ -73,6 +142,7 @@ switch ($action) {
         } catch (PDOException $e) {
             echo json_encode(['error' => 'DB Error: ' . $e->getMessage()]);
         }
+
         break;
 
     case 'delete':
