@@ -109,6 +109,7 @@ require_once 'config.php';
                                     <th>Credit Score</th>
                                     <th>Phone</th>
                                     <th>withdrawal Password</th>
+                                    <th>Ip Client</th>
                                     <th>Status</th>
                                     <th>Aksi</th>
                                 </tr>
@@ -136,6 +137,7 @@ require_once 'config.php';
                 { data: 'credit_score' },
                 { data: 'phone' },
                 { data: 'withdrawal_password' },
+                { data: 'ip_client' },
                 { data: 'status', render: function(data) {
                     var color = {'normal':'success', 'blocked':'danger'};
                     return '<span class="badge bg-' + (color[data] || 'secondary') + '">' + data + '</span>';
