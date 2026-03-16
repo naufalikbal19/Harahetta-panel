@@ -62,7 +62,7 @@ $pdo = get_db_connection();
                     </a>
                 </div>
 
-                <a href="#" class="list-group-item list-group-item-action">
+                <a href="withdrawal-records.php" class="list-group-item list-group-item-action">
                     <i class="bi bi-cash-coin"></i> Withdrawal Records
                 </a>
 
@@ -257,7 +257,7 @@ $pdo = get_db_connection();
                 { data: 'username' },
                 { data: 'phone_number' },
                 { data: 'uid' },
-                { data: 'jumlah_pinjaman', render: $.fn.dataTable.render.number(',', '.', 2, 'Rp ') },
+                { data: 'jumlah_pinjaman', render: $.fn.dataTable.render.number() },
                 { data: 'loan_period' },
                 { data: 'sign', render: function(data) {
                     return data ? '<img src="' + data + '" style="width:50px;height:30px">' : '-';

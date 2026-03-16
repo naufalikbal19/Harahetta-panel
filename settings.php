@@ -96,7 +96,7 @@ while ($row = $stmt->fetch()) {
                     </a>
                 </div>
 
-                <a href="#" class="list-group-item list-group-item-action">
+                <a href="withdrawal-records.php" class="list-group-item list-group-item-action">
                     <i class="bi bi-cash-coin"></i> Withdrawal Records
                 </a>
 

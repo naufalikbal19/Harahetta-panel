@@ -59,7 +59,7 @@ require_once 'config.php';
                     </a>
                 </div>
 
-                <a href="#" class="list-group-item list-group-item-action">
+                <a href="withdrawal-records.php" class="list-group-item list-group-item-action">
                     <i class="bi bi-cash-coin"></i> Withdrawal Records
                 </a>
 
@@ -182,4 +182,3 @@ require_once 'config.php';
     </script>
 </body>
 </html>
-
