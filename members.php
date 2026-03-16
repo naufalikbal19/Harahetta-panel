@@ -118,6 +118,54 @@ require_once 'config.php';
                     </div>
                 </div>
             </div>
+
+            <!-- Edit Member Modal -->
+            <div class="modal fade" id="editModal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Edit Member</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <form id="editForm">
+                            <div class="modal-body">
+                                <input type="hidden" name="action" value="update">
+                                <div class="mb-3">
+                                    <label class="form-label">ID Number</label>
+                                    <input type="text" class="form-control" name="id_number" id="id_number" readonly>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Phone</label>
+                                    <input type="text" class="form-control" name="phone" id="phone">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Credit Score</label>
+                                    <input type="number" class="form-control" name="credit_score" id="credit_score">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Withdrawal Password</label>
+                                    <input type="text" class="form-control" name="withdrawal_password" id="withdrawal_password">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">IP Client</label>
+                                    <input type="text" class="form-control" name="ip_client" id="ip_client">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Status</label>
+                                    <select class="form-select" name="status" id="status">
+                                        <option value="normal">Normal</option>
+                                        <option value="blocked">Blocked</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                <button type="submit" class="btn btn-primary">Simpan</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -158,11 +206,37 @@ require_once 'config.php';
         // Edit
         $(document).on('click', '.edit-btn', function() {
             var id = $(this).data('id');
-            $.get('api/members.php?id=' + id, function(data) {
-                alert('Edit member ' + id + '\nData: ' + JSON.stringify(data, null, 2));
-            }).fail(function() {
-                alert('Error loading member data');
+            // Perbaikan: Tambahkan action=get agar API mengembalikan data satu member saja
+            $.get('api/members.php?action=get&id=' + id, function(data) {
+                if (data && !data.error) {
+                    $('#id_number').val(data.id_number);
+                    $('#phone').val(data.phone);
+                    $('#credit_score').val(data.credit_score);
+                    $('#withdrawal_password').val(data.withdrawal_password);
+                    $('#ip_client').val(data.ip_client);
+                    $('#status').val(data.status);
+                    
+                    var modal = new bootstrap.Modal(document.getElementById('editModal'));
+                    modal.show();
+                } else {
+                    alert(data.error || 'Gagal mengambil data member');
+                }
             });
+        });
+
+        // Save Changes
+        $('#editForm').on('submit', function(e) {
+            e.preventDefault();
+            $.post('api/members.php', $(this).serialize(), function(response) {
+                if (response.success) {
+                    var modal = bootstrap.Modal.getInstance(document.getElementById('editModal'));
+                    modal.hide();
+                    table.ajax.reload();
+                    alert(response.message || 'Berhasil diupdate');
+                } else {
+                    alert(response.message || 'Gagal update');
+                }
+            }, 'json');
         });
 
         // Delete
