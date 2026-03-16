@@ -55,9 +55,9 @@ switch ($action) {
             'jumlah_pinjaman' => floatval($_POST['jumlah_pinjaman'] ?? 0),
             'loan_period' => intval($_POST['loan_period'] ?? 0),
             'sign' => trim($_POST['sign'] ?? ''),
-            'id_front' => trim($_POST['id_front'] ?? ''),
-            'id_back' => trim($_POST['id_back'] ?? ''),
-            'selfie' => trim($_POST['selfie'] ?? ''),
+            'id_front' => trim($_POST['id_front'] ?? ''), //Remove this line
+            'id_back' => trim($_POST['id_back'] ?? ''),   //Remove this line
+            'selfie' => trim($_POST['selfie'] ?? ''),   //Remove this line
             'bank' => trim($_POST['bank'] ?? ''),
             'no_rekening' => trim($_POST['no_rekening'] ?? ''),
             'status' => $_POST['status'] ?? 'pending',
@@ -68,7 +68,9 @@ switch ($action) {
 
 
 
-
+        $data['id_front'] = trim($_POST['id_front'] ?? '');
+        $data['id_back'] = trim($_POST['id_back'] ?? '');
+        $data['selfie'] = trim($_POST['selfie'] ?? '');
         $data['sign'] = trim($_POST['sign'] ?? '');
 
         $upload_dir = '../uploads/';
@@ -131,7 +133,9 @@ switch ($action) {
                 // Update
                 $sql = 'UPDATE pinjaman SET ' . implode(', ', array_map(fn($k) => "$k=?", array_keys($data))) . ' WHERE id=?';
                 $stmt = $pdo->prepare($sql);
-                $stmt->execute(array_values($data) + [$id]);
+                $params = array_values($data);
+                $params[] = $id;
+                $stmt->execute($params);
             } else {
                 // Insert
                 $sql = 'INSERT INTO pinjaman (' . implode(', ', array_keys($data)) . ') VALUES (' . implode(',', array_fill(0, count($data), '?')) . ')';
@@ -177,4 +181,3 @@ switch ($action) {
         }
 }
 ?>
-
