@@ -29,7 +29,7 @@ function get_db_connection() {
         ]);
         return $pdo;
     } catch (PDOException $e) {
-        die('Koneksi DB gagal: ' . $e->getMessage());
+        throw new PDOException('Koneksi DB gagal: ' . $e->getMessage());
     }
 }
 }
@@ -67,4 +67,3 @@ function get_setting($key, $default = '') {
     return $settings[$key] ?? $default;
 }
 }
-

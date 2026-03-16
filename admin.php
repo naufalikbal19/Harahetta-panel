@@ -130,6 +130,7 @@ require_once 'config.php';
                         <form id="adminForm">
                             <div class="modal-body">
                                 <input type="hidden" id="id" name="id">
+                                <input type="hidden" name="action" value="save">
                                 <div class="mb-3">
                                     <label class="form-label">Username *</label>
                                     <input type="text" class="form-control" name="username" required>
@@ -176,17 +177,14 @@ require_once 'config.php';
     <script>
     $(document).ready(function() {
         var table = $('#adminTable').DataTable({
-
-
                 ajax: {
                     url: 'api/admin.php?action=list',
-                    dataSrc: function(json) {
-                        console.log('List response:', json);
-                        return json;
+                    dataSrc: 'data',
+                    error: function(xhr, error, code) {
+                        console.error('Ajax error:', xhr.responseText);
+                        alert('Gagal memuat data admin: ' + (xhr.responseJSON && xhr.responseJSON.error ? xhr.responseJSON.error : code || 'Unknown error. Check console.'));
                     }
                 },
-
-
             columns: [
                 { data: 'id' },
                 { data: 'username' },
@@ -214,18 +212,28 @@ require_once 'config.php';
                 data: new FormData(this),
                 processData: false,
                 contentType: false,
-
-
-
                 success: function(response) {
                     console.log('Save API Response:', response);
-                    if (response && response.success === true) {
-                        table.ajax.reload();
-                        $('#addModal').modal('hide');
-                        alert('Admin berhasil disimpan!');
-                    } else {
-                        alert('Error atau response tidak valid. Console: ' + JSON.stringify(response));
+                    try {
+                        var resp = typeof response === 'string' ? JSON.parse(response) : response;
+                        console.log('Parsed response:', resp);
+
+                        if (resp && resp.success === true) {
+                            table.ajax.reload();
+                            $('#addModal').modal('hide');
+                            alert('Admin berhasil disimpan!');
+                            return;
+                        }
+
+                        alert('Error: ' + (resp.error || 'Invalid response'));
+                    } catch (e) {
+                        console.error('JSON parse error:', e, response);
+                        alert('Invalid JSON response from server');
                     }
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX error:', status, error, xhr.responseText);
+                    alert('Gagal menyimpan data admin: ' + status + ' - ' + error + ' - ' + xhr.responseText);
                 }
 
 
@@ -241,16 +249,23 @@ require_once 'config.php';
 
         $(document).on('click', '.edit-btn', function() {
             var id = $(this).data('id');
-            $.get('api/admin.php?id=' + id, function(data) {
-                $('#id').val(data.id);
-                $('#adminForm input[name="username"]').val(data.username);
-                $('#adminForm input[name="email"]').val(data.email);
-                $('#adminForm input[name="full_name"]').val(data.full_name);
-                $('#adminForm select[name="role"]').val(data.role);
-                $('#adminForm input[name="is_active"]').prop('checked', data.is_active);
-                $('.modal-title').text('Edit Admin');
-                $('#addModal').modal('show');
-            });
+                $.get('api/admin.php?action=get&id=' + id, function(response) {
+                    if (response.error || !response.success) {
+                        alert('Error: ' + (response.error || 'Gagal memuat data'));
+                        return;
+                    }
+                    var data = response.data;
+                    $('#id').val(data.id);
+                    $('#adminForm input[name="username"]').val(data.username);
+                    $('#adminForm input[name="email"]').val(data.email);
+                    $('#adminForm input[name="full_name"]').val(data.full_name);
+                    $('#adminForm select[name="role"]').val(data.role);
+                    $('#adminForm input[name="is_active"]').prop('checked', data.is_active);
+                    $('.modal-title').text('Edit Admin');
+                    $('#addModal').modal('show');
+                }).fail(function() {
+                    alert('Gagal memuat data admin');
+                });
         });
 
         $(document).on('click', '.delete-btn', function() {
@@ -278,4 +293,3 @@ require_once 'config.php';
     </script>
 </body>
 </html>
-
