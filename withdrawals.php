@@ -55,6 +55,8 @@ switch ($action) {
             $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
             echo json_encode(['data' => $data]);
         } catch (Exception $e) {
+            // Log the error for debugging purposes
+            error_log("Withdrawals API Error (list action): " . $e->getMessage());
             echo json_encode(['data' => []]);
         }
         break;

@@ -109,23 +109,79 @@ require_once 'config.php';
                     </div>
                 </div>
             </div>
+
+            <!-- Edit Withdrawal Modal -->
+            <div class="modal fade" id="editModal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Edit Penarikan</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <form id="editForm">
+                            <div class="modal-body">
+                                <input type="hidden" name="action" value="update">
+                                <input type="hidden" name="id" id="id">
+                                <div class="mb-3">
+                                    <label class="form-label">UID</label>
+                                    <input type="text" class="form-control bg-light" id="uid" readonly>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Phone Number</label>
+                                    <input type="text" class="form-control bg-light" id="phone_number" readonly>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Jumlah</label>
+                                    <input type="text" class="form-control bg-light" id="jumlah_pinjaman" readonly>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Bank</label>
+                                    <input type="text" class="form-control" name="bank" id="bank">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Nomor Rekening</label>
+                                    <input type="text" class="form-control" name="no_rekening" id="no_rekening">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Status</label>
+                                    <select class="form-select" name="status" id="status">
+                                        <option value="pending">Pending</option>
+                                        <option value="proses">Proses</option>
+                                        <option value="lunas">Lunas</option>
+                                        <option value="macet">Macet</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                <button type="submit" class="btn btn-primary">Simpan</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
     $(document).ready(function() {
         var table = $('#withdrawalTable').DataTable({
-            ajax: 'api/withdrawals.php',
+            ajax: 'api/withdrawals.php?action=list',
             columns: [
                 {
                     data: 'id', orderable: false,
-                    render: function (data) { return '<input type="checkbox" class="row-select" value="' + data + '">'; }
+                    render: function (data, type, row) { 
+                        // Menggunakan row.id jika data 'id' null atau undefined
+                        var val = data || row.id;
+                        return '<input type="checkbox" class="row-select" value="' + val + '">'; 
+                    }
                 },
                 { data: 'uid' },
                 { data: 'phone_number' },
                 { data: 'jumlah_pinjaman', render: $.fn.dataTable.render.number() },
                 { data: 'tanggal_pinjam' },
                 { data: 'status', render: function(data) {
+                    if(!data) return '-';
                     var statusMap = {
                         'pending': { 'class': 'warning', 'text': 'Pending' },
                         'proses': { 'class': 'info', 'text': 'Proses' },
@@ -137,15 +193,67 @@ require_once 'config.php';
                 }},
                 { data: 'bank' },
                 { data: 'no_rekening' },
-                { data: 'id', orderable: false, render: function(data) {
-                    return '<button class="btn btn-sm btn-info edit-btn" data-id="' + data + '"><i class="bi bi-pencil"></i></button> ' +
-                           '<button class="btn btn-sm btn-danger delete-btn" data-id="' + data + '"><i class="bi bi-trash"></i></button>';
+                { data: 'id', orderable: false, render: function(data, type, row) {
+                    var id = data || row.id;
+                    return '<button class="btn btn-sm btn-info edit-btn" data-id="' + id + '"><i class="bi bi-pencil"></i></button> ' +
+                           '<button class="btn btn-sm btn-danger delete-btn" data-id="' + id + '"><i class="bi bi-trash"></i></button>';
                 }}
             ],
             order: [[4, 'desc']] // Urutkan berdasarkan Tanggal Pinjam terbaru
         });
 
         $('#selectAll').on('change', function() { $('.row-select').prop('checked', this.checked); });
+
+        // Edit Button Click
+        $(document).on('click', '.edit-btn', function() {
+            var id = $(this).data('id');
+            $.get('api/withdrawals.php?action=get&id=' + id, function(data) {
+                if (data && !data.error) {
+                    $('#id').val(data.id);
+                    $('#uid').val(data.uid);
+                    $('#phone_number').val(data.phone_number);
+                    $('#jumlah_pinjaman').val(data.jumlah_pinjaman);
+                    $('#bank').val(data.bank);
+                    $('#no_rekening').val(data.no_rekening);
+                    $('#status').val(data.status);
+                    
+                    var modal = new bootstrap.Modal(document.getElementById('editModal'));
+                    modal.show();
+                } else {
+                    alert(data.error || 'Gagal mengambil data');
+                }
+            });
+        });
+
+        // Save Changes
+        $('#editForm').on('submit', function(e) {
+            e.preventDefault();
+            $.post('api/withdrawals.php', $(this).serialize(), function(response) {
+                if (response.success) {
+                    var modal = bootstrap.Modal.getInstance(document.getElementById('editModal'));
+                    modal.hide();
+                    table.ajax.reload();
+                    alert('Data berhasil diperbarui');
+                } else {
+                    alert('Gagal update: ' + (response.message || 'Unknown error'));
+                }
+            }, 'json');
+        });
+
+        // Delete Button Click
+        $(document).on('click', '.delete-btn', function() {
+            if (confirm('Yakin ingin menghapus data ini?')) {
+                var id = $(this).data('id');
+                $.post('api/withdrawals.php', { id: id, action: 'delete' }, function(response) {
+                    if (response.success) {
+                        table.ajax.reload();
+                    } else {
+                        alert('Gagal menghapus');
+                    }
+                }, 'json');
+            }
+        });
+
         $('#sidebarToggle').on('click', function() { $('#sidebar-wrapper').toggleClass('show'); });
     });
     </script>
