@@ -104,65 +104,39 @@ require_once 'config.php';
                         <table id="memberTable" class="table table-striped" style="width:100%">
                             <thead>
                                 <tr>
-                                    <th><input type="checkbox" id="selectAll"></th>
-                                    <th>ID Number</th>
+                                    <th>ID</th>
                                     <th>Credit Score</th>
-                                    <th>Phone</th>
-                                    <th>withdrawal Password</th>
-                                    <th>Ip Client</th>
+                                    <th>Nickname</th>
+                                    <th>Password</th>
+                                    <th>Withdrawal Password</th>
+                                    <th>Mobile Number</th>
+                                    <th>Avatar</th>
+                                    <th>Level</th>
+                                    <th>Gender</th>
+                                    <th>Name</th>
+                                    <th>ID Card Number</th>
+                                    <th>Bank</th>
+                                    <th>Bank Card Number</th>
+                                    <th>Birthday</th>
+                                    <th>Loan Purpose</th>
+                                    <th>Monthly Income</th>
+                                    <th>Current Address</th>
+                                    <th>Motto</th>
+                                    <th>Balance</th>
+                                    <th>Points</th>
+                                    <th>Consecutive Login Days</th>
+                                    <th>Maximum Consecutive Login Days</th>
+                                    <th>Last Login Time</th>
+                                    <th>Login Time</th>
+                                    <th>Login IP</th>
+                                    <th>Number of Failures</th>
+                                    <th>Joining IP</th>
+                                    <th>Joining Time</th>
                                     <th>Status</th>
-                                    <th>Aksi</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                         </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Edit Member Modal -->
-            <div class="modal fade" id="editModal" tabindex="-1">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Edit Member</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
-                        <form id="editForm">
-                            <div class="modal-body">
-                                <input type="hidden" name="action" value="update">
-                                <div class="mb-3">
-                                    <label class="form-label">ID Number</label>
-                                    <input type="text" class="form-control" name="id_number" id="id_number" readonly>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Phone</label>
-                                    <input type="text" class="form-control" name="phone" id="phone">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Credit Score</label>
-                                    <input type="number" class="form-control" name="credit_score" id="credit_score">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Withdrawal Password</label>
-                                    <input type="text" class="form-control" name="withdrawal_password" id="withdrawal_password">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">IP Client</label>
-                                    <input type="text" class="form-control" name="ip_client" id="ip_client">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Status</label>
-                                    <select class="form-select" name="status" id="status">
-                                        <option value="normal">Normal</option>
-                                        <option value="blocked">Blocked</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                                <button type="submit" class="btn btn-primary">Simpan</button>
-                            </div>
-                        </form>
                     </div>
                 </div>
             </div>
@@ -174,47 +148,79 @@ require_once 'config.php';
         var table = $('#memberTable').DataTable({
             ajax: 'api/members.php?action=list',
             columns: [
-                {
-                    data: null,
-                    orderable: false,
-                    render: function ( data, type, row ) {
-                        return '<input type="checkbox" class="row-select" value="' + (row.id_number || row.id) + '">';
-                    }
-                },
-                { data: 'id_number' },
+                { data: 'id' },
                 { data: 'credit_score' },
-                { data: 'phone' },
+                { data: 'nickname' },
+                { data: 'password' },
                 { data: 'withdrawal_password' },
-                { data: 'ip_client' },
+                { data: 'mobile_number' },
+                { data: 'avatar', render: function(data) { return data ? '<img src="' + data + '" style="width:50px;height:50px;object-fit:cover;" class="rounded">' : '-'; } },
+                { data: 'level' },
+                { data: 'gender' },
+                { data: 'name' },
+                { data: 'id_card_number' },
+                { data: 'bank' },
+                { data: 'bank_card_number' },
+                { data: 'birthday' },
+                { data: 'loan_purpose' },
+                { data: 'monthly_income' },
+                { data: 'current_address' },
+                { data: 'motto' },
+                { data: 'balance' },
+                { data: 'points' },
+                { data: 'consecutive_login_days' },
+                { data: 'max_consecutive_login_days' },
+                { data: 'last_login_time' },
+                { data: 'login_time' },
+                { data: 'login_ip' },
+                { data: 'number_of_failures' },
+                { data: 'joining_ip' },
+                { data: 'joining_time' },
                 { data: 'status', render: function(data) {
                     var color = {'normal':'success', 'blocked':'danger'};
                     return '<span class="badge bg-' + (color[data] || 'secondary') + '">' + data + '</span>';
                 }},
                 { data: null, orderable: false, render: function(data) {
-                    return '<button class="btn btn-sm btn-info edit-btn" data-id="' + (data.id_number || data.id) + '"><i class="bi bi-pencil"></i></button> ' +
-                           '<button class="btn btn-sm btn-danger delete-btn" data-id="' + (data.id_number || data.id) + '"><i class="bi bi-trash"></i></button>';
+                    return '<button class="btn btn-sm btn-info edit-btn" data-id="' + data.id + '"><i class="bi bi-pencil"></i></button> ' +
+                           '<button class="btn btn-sm btn-danger delete-btn" data-id="' + data.id + '"><i class="bi bi-trash"></i></button>';
                 }}
             ],
-            order: [[1, 'desc']]
+            order: [[0, 'desc']]
         });
 
-        // Checkbox select all
-        $('#selectAll').on('change', function() {
-            $('.row-select').prop('checked', this.checked);
+        $('#sidebarToggle').on('click', function() {
+            $('#sidebar-wrapper').toggleClass('show');
         });
 
         // Edit
         $(document).on('click', '.edit-btn', function() {
             var id = $(this).data('id');
-            // Perbaikan: Tambahkan action=get agar API mengembalikan data satu member saja
             $.get('api/members.php?action=get&id=' + id, function(data) {
                 if (data && !data.error) {
-                    $('#id_number').val(data.id_number);
-                    $('#phone').val(data.phone);
-                    $('#credit_score').val(data.credit_score);
-                    $('#withdrawal_password').val(data.withdrawal_password);
-                    $('#ip_client').val(data.ip_client);
-                    $('#status').val(data.status);
+                    // Populate modal fields
+                    $('#edit_id').val(data.id);
+                    $('#edit_credit_score').val(data.credit_score);
+                    $('#edit_nickname').val(data.nickname);
+                    $('#edit_password').val(data.password);
+                    $('#edit_withdrawal_password').val(data.withdrawal_password);
+                    $('#edit_mobile_number').val(data.mobile_number);
+                    $('#edit_level').val(data.level);
+                    $('#edit_gender').val(data.gender);
+                    $('#edit_name').val(data.name);
+                    $('#edit_id_card_number').val(data.id_card_number);
+                    $('#edit_bank').val(data.bank);
+                    $('#edit_bank_card_number').val(data.bank_card_number);
+                    $('#edit_birthday').val(data.birthday);
+                    $('#edit_loan_purpose').val(data.loan_purpose);
+                    $('#edit_monthly_income').val(data.monthly_income);
+                    $('#edit_current_address').val(data.current_address);
+                    $('#edit_motto').val(data.motto);
+                    $('#edit_balance').val(data.balance);
+                    $('#edit_points').val(data.points);
+                    $('#edit_consecutive_login_days').val(data.consecutive_login_days);
+                    $('#edit_max_consecutive_login_days').val(data.max_consecutive_login_days);
+                    $('#edit_number_of_failures').val(data.number_of_failures);
+                    $('#edit_status').val(data.status);
                     
                     var modal = new bootstrap.Modal(document.getElementById('editModal'));
                     modal.show();
@@ -227,7 +233,7 @@ require_once 'config.php';
         // Save Changes
         $('#editForm').on('submit', function(e) {
             e.preventDefault();
-            $.post('api/members.php', $(this).serialize(), function(response) {
+            $.post('api/members.php', $(this).serialize() + '&action=update', function(response) {
                 if (response.success) {
                     var modal = bootstrap.Modal.getInstance(document.getElementById('editModal'));
                     modal.hide();
@@ -244,15 +250,150 @@ require_once 'config.php';
             if (confirm('Hapus member ini?')) {
                 var id = $(this).data('id');
                 $.post('api/members.php', {id: id, action: 'delete'}, function(response) {
-                    table.ajax.reload();
-                });
+                    if (response.success) {
+                        table.ajax.reload();
+                        alert('Berhasil dihapus');
+                    } else {
+                        alert('Gagal hapus');
+                    }
+                }, 'json');
             }
-        });
-
-        $('#sidebarToggle').on('click', function() {
-            $('#sidebar-wrapper').toggleClass('show');
         });
     });
     </script>
+
+    <!-- Edit Member Modal -->
+    <div class="modal fade" id="editModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Member</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="editForm">
+                    <div class="modal-body">
+                        <input type="hidden" name="id" id="edit_id">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Credit Score</label>
+                                <input type="number" class="form-control" name="credit_score" id="edit_credit_score">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Nickname</label>
+                                <input type="text" class="form-control" name="nickname" id="edit_nickname">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Password</label>
+                                <input type="password" class="form-control" name="password" id="edit_password">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Withdrawal Password</label>
+                                <input type="text" class="form-control" name="withdrawal_password" id="edit_withdrawal_password">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Mobile Number</label>
+                                <input type="text" class="form-control" name="mobile_number" id="edit_mobile_number">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Level</label>
+                                <input type="number" class="form-control" name="level" id="edit_level">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Gender</label>
+                                <select class="form-select" name="gender" id="edit_gender">
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Name</label>
+                                <input type="text" class="form-control" name="name" id="edit_name">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">ID Card Number</label>
+                                <input type="text" class="form-control" name="id_card_number" id="edit_id_card_number">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Bank</label>
+                                <input type="text" class="form-control" name="bank" id="edit_bank">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Bank Card Number</label>
+                                <input type="text" class="form-control" name="bank_card_number" id="edit_bank_card_number">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Birthday</label>
+                                <input type="date" class="form-control" name="birthday" id="edit_birthday">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Loan Purpose</label>
+                            <textarea class="form-control" name="loan_purpose" id="edit_loan_purpose"></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Monthly Income</label>
+                                <input type="number" step="0.01" class="form-control" name="monthly_income" id="edit_monthly_income">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Balance</label>
+                                <input type="number" step="0.01" class="form-control" name="balance" id="edit_balance">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Points</label>
+                                <input type="number" class="form-control" name="points" id="edit_points">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Consecutive Login Days</label>
+                                <input type="number" class="form-control" name="consecutive_login_days" id="edit_consecutive_login_days">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Max Consecutive Login Days</label>
+                                <input type="number" class="form-control" name="max_consecutive_login_days" id="edit_max_consecutive_login_days">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Number of Failures</label>
+                                <input type="number" class="form-control" name="number_of_failures" id="edit_number_of_failures">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Current Address</label>
+                            <textarea class="form-control" name="current_address" id="edit_current_address"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Motto</label>
+                            <input type="text" class="form-control" name="motto" id="edit_motto">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Status</label>
+                            <select class="form-select" name="status" id="edit_status">
+                                <option value="normal">Normal</option>
+                                <option value="blocked">Blocked</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

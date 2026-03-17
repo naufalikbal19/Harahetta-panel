@@ -19,16 +19,21 @@ if ($_POST) {
             require_once __DIR__ . '/config.php';
             $pdo = get_db_connection();
             // Check if phone exists
-            $stmt = $pdo->prepare("SELECT * FROM members WHERE phone = ?");
+            $stmt = $pdo->prepare("SELECT * FROM members WHERE mobile_number = ?");
             $stmt->execute([$phone]);
             $member = $stmt->fetch();
 
             if ($member) {
                 // Login - check password
                 if (password_verify($password, $member['password'])) {
+                    // Update login info
+                    $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+                    $update_stmt = $pdo->prepare("UPDATE members SET last_login_time = NOW(), login_time = NOW(), login_ip = ? WHERE id = ?");
+                    $update_stmt->execute([$ip, $member['id']]);
+                    
                     $_SESSION['member_logged_in'] = true;
                     $_SESSION['member_id'] = $member['id'];
-                    $_SESSION['phone'] = $member['phone'];
+                    $_SESSION['phone'] = $member['mobile_number'];
                     header('Location: member-dashboard.php');
                     exit;
                 } else {
@@ -37,8 +42,9 @@ if ($_POST) {
             } else {
                 // Register new member
                 $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-                $stmt = $pdo->prepare("INSERT INTO members (phone,nama, password, created_at) VALUES (?, ?, ?, NOW())");
-                $stmt->execute([$phone, $phone, $hashed_password]);
+                $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+                $stmt = $pdo->prepare("INSERT INTO members (mobile_number, nickname, password, login_ip, joining_ip, joining_time, login_time, last_login_time) VALUES (?, ?, ?, ?, ?, NOW(), NOW(), NOW())");
+                $stmt->execute([$phone, $phone, $hashed_password, $ip, $ip]);
                 $member_id = $pdo->lastInsertId();
                 
                 $_SESSION['member_logged_in'] = true;
