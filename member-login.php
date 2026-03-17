@@ -37,13 +37,14 @@ if ($_POST) {
             } else {
                 // Register new member
                 $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-                $stmt = $pdo->prepare("INSERT INTO members (phone, password, created_at) VALUES (?, ?, NOW())");
-                $stmt->execute([$phone, $hashed_password]);
+                $stmt = $pdo->prepare("INSERT INTO members (phone,nama, password, created_at) VALUES (?, ?, ?, NOW())");
+                $stmt->execute([$phone, $phone, $hashed_password]);
                 $member_id = $pdo->lastInsertId();
                 
                 $_SESSION['member_logged_in'] = true;
                 $_SESSION['member_id'] = $member_id;
                 $_SESSION['phone'] = $phone;
+                $_SESSION['nama'] = $phone;
                 header('Location: member-dashboard.php');
                 exit;
             }
@@ -57,7 +58,7 @@ if ($_POST) {
 <html lang="id">
 <head>
     <meta charset="utf-8">
-    <title>Login Member - Harahetta</title>
+    <title>Login Member </title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
@@ -128,4 +129,3 @@ if ($_POST) {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
